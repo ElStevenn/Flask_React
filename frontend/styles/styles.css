@@ -1,3 +1,25 @@
 body{
-    background-color: aliceblue;
+    background-color: lightgrey;
+    font-family: 'Segoe UI';
+}
+
+h1{
+    font-weight: 700;
+    font-variant: inherit;
+    text-decoration: underline;
+    text-decoration-color: blue;
+    letter-spacing: 0 20px;
+    color: #496139;
+    font-size: 50px;
+    text-align: center;
+}
+
+.inputs_{
+    display: flex;
+    
+}
+
+.input_div {
+    position: relative;
+    top: 75%; 
 }

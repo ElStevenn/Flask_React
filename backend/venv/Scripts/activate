@@ -38,7 +38,7 @@ deactivate () {
 # unset irrelevant variables
 deactivate nondestructive
 
-VIRTUAL_ENV="D:\Data_Analyst\Short Projects\Spanish_Elections\backend\venv"
+VIRTUAL_ENV="A:\REACT\Task_Manager\backend\venv"
 export VIRTUAL_ENV
 
 _OLD_VIRTUAL_PATH="$PATH"
