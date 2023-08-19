@@ -1,18 +1,19 @@
 from flask import Flask, jsonify, request
 from flask_cors import CORS
-from sqlalchemy import select, create_engine, ForeignKey, types, Integer, Column, String, MetaData
+from sqlalchemy import select, create_engine, ForeignKey, types, Integer, Column, String, MetaData, Date, DateTime
 from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy.orm import declarative_base
-import asyncio, uuid
+import asyncio, uuid, aiofiles
 
-# This is the server, where i have to provide the data to REACT, and there, yes, i just have to try to get all the data
-# As you see, here we doesn't have render_template to html response, we have jsonfy, that's the data that we are sending to frond end
-
+"""
+First of all, I create an async table calles 'task_list_table'  where I save all 
+data. (not order)
+"""
 app = Flask(__name__)
 CORS(app, resources={r"/*": {"origins": "*"}})
 
-DATABASE_URL = "sqlite+aiosqlite:///project.db"
+DATABASE_URL = "sqlite+aiosqlite:///databases/database.db"
 engine = create_async_engine(DATABASE_URL, echo=True)
 
 # Async session maker for the engine
@@ -22,19 +23,108 @@ AsyncSessionLocal = sessionmaker(
     expire_on_commit=False,
 )
 
+meta = MetaData()
 Base = declarative_base()
 
 
-class MiniTable(Base):
-    __tablename__ = "MiniTable"
+class Task_list_table(Base):
+    __tablename__ = "Task_list_table"
 
     ID = Column(String, primary_key=True, default=lambda: str(uuid.uuid4()))
-    Name = Column(String, nullable=False)
-    Email = Column(String, nullable=False)
+    Title = Column(String(55), nullable=False)
+    Text = Column(String(3000), nullable=False)
+    DeadLine = Column(DateTime, nullable=False)
+    Start_Day = Column(Date)
 
     def __repr__(self):
-        return f"{self.Name}"
+        return f"{self.Title}"
 
+async def write_bla(task):
+    async with aiofiles.open("new_task.txt", "w") as f:
+        await f.write(f"{task['title']}, {task['text']}, {task['deadline']}, {task['start_day']}")
+
+
+@app.route('/')
+def main():
+    return "<h1>Server is runing!</h1>"
+
+@app.route('/get_task_and_ddbb', methods=['POST'])
+async def insert_database():
+    """Description here"""
+    data = request.json
+    new_task = {"title":data['title'], "text": data['text'], "deadline": data['deadline'], "start_day": data['start_day']}
+
+    try:
+        await asyncio.gather(write_bla(new_task))
+        return jsonify({"Result":f"Task called '{data['title']}' registered successfully!"})
+    except Exception as e:
+        print(e)
+        return jsonify({"Error": e})
+
+    
+
+    """
+    try:
+        async with engine.begin() as conn:
+            await conn.run_sync(meta.create_all)
+
+            await conn.execute(
+                Task_list_table.insert(), new_lask
+            )
+
+            return jsonify({"Result":f"Task called '{data['title']}' registered successfully!"})
+    except Exception as e:
+        print(e)
+        return jsonify({"Error": e})
+    """
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+"""
 async def get_email_users():
     async with engine.begin() as conn:
         result = await conn.execute(select(MiniTable))
@@ -42,13 +132,10 @@ async def get_email_users():
         return result
 
 async def save_user_email(user,email):
-    """This function I just save the user and email"""
+    '''This function I just save the user and email'''
     async with open("myFile", "w") as f:
         await f.write(f"{user} - {email}")
 
-@app.route('/')
-def main():
-    return "<h1>It actually works!</h1>"
 
 @app.route('/test')
 def test():
@@ -85,7 +172,7 @@ async def receive_data():
             await session.rollback()  # Rollback if there's an error
             return jsonify({"Error": str(e)})
 
-    
+"""  
 
 
 

@@ -52,7 +52,7 @@ function Textarea_input() {
         <div className='text_input_div'>
             <label for='text_area_'>Text</label>
             <div className='textarea-wrapper'>
-                <textarea autocapitalize="off" autoComplete="off" placeholder spellcheck="false" className='text_area' rows="5" cols="50" id="text_area_" onInput={updateCounting}></textarea>
+                <textarea autoCapitalize="off" autoComplete="off"  autoCorrect='off' className='text_area' rows="5" cols="50" id="text_area_" onInput={updateCounting}></textarea>
                 <span id="conting" className='char-count'>0/300</span>
             </div>
             
@@ -78,13 +78,42 @@ function Additional_inputs() {
 
 
 function PartInput() {
+
+
+    function add_new_task() {
+        let Title = document.getElementById('title_input').value;
+        let Text_ = document.getElementById('text_area_').value;
+        let deadline = document.getElementById('add_option_1').value;
+        let start_day = document.getElementById('add_option_2').value;
+
+        const actualTask = {
+            'title': Title,
+            'text': Text_,
+            'deadline': deadline,
+            'start_day': start_day
+        };
+
+        console.log(actualTask);
+
+        // Send the data to API and then insert into DataBase
+        axios.post('http://localhost:5000/get_task_and_ddbb', actualTask)
+            .then(response => {
+                console.log("Response:", response.data);
+            })
+            .catch(error => {
+                console.error("Error sending data:", error);
+            });
+    }
+
+
+
     return(
         <>
         <div className='input_div'>
             <Title_input />
             <Textarea_input />
             <Additional_inputs />
-            <a href="#" className='sendButton'>SEND</a>
+            <a href="#" className='sendButton' onClick={add_new_task}>SEND</a>
         </div>
         </>
     )
