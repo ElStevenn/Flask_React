@@ -1,10 +1,11 @@
 from flask import Flask, jsonify, request
 from flask_cors import CORS
 from sqlalchemy import select, create_engine, ForeignKey, types, Integer, Column, String, MetaData, Date, DateTime
-from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession
+from sqlalchemy.ext.asyncio import create_async_engine,  AsyncSession
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy.orm import declarative_base
 import asyncio, uuid, aiofiles
+from datetime import datetime, date
 
 """
 First of all, I create an async table calles 'task_list_table'  where I save all 
@@ -23,7 +24,6 @@ AsyncSessionLocal = sessionmaker(
     expire_on_commit=False,
 )
 
-meta = MetaData()
 Base = declarative_base()
 
 
@@ -39,8 +39,8 @@ class Task_list_table(Base):
     def __repr__(self):
         return f"{self.Title}"
 
-async def write_bla(task):
-    async with aiofiles.open("new_task.txt", "w") as f:
+async def write_task_to_file_txt(task):
+    async with aiofiles.open("task.txt", "w") as f:
         await f.write(f"{task['title']}, {task['text']}, {task['deadline']}, {task['start_day']}")
 
 
@@ -52,32 +52,42 @@ def main():
 async def insert_database():
     """Description here"""
     data = request.json
-    new_task = {"title":data['title'], "text": data['text'], "deadline": data['deadline'], "start_day": data['start_day']}
 
-    try:
-        await asyncio.gather(write_bla(new_task))
-        return jsonify({"Result":f"Task called '{data['title']}' registered successfully!"})
-    except Exception as e:
-        print(e)
-        return jsonify({"Error": e})
+    # Parsing start_day
+    start_year, start_month, start_day = map(int, data['start_day'].split('-'))
+    
+    # Parsing DeadLine
+    date_part, time_part = data['deadline'].split('T')
+    year, month, day = map(int, date_part.split('-'))
+    hour, minute = map(int, time_part.split(':'))  
+   
+    new_task = Task_list_table(
+        Title = data['title'], 
+        Text = data['text'], 
+        DeadLine = datetime(year, month, day, hour=hour, minute=minute), 
+        Start_Day = date(start_year, start_month, start_day)
+    )
+
+    async with AsyncSessionLocal() as session:
+        session.add(new_task)
+        try:
+            await session.commit() # Try to comit
+            return jsonify({"Result":f"Task called '{data['title']}' registered successfully!"})
+        
+        except Exception as e:
+            print(str(e))
+            return jsonify({"Error": str(e)})
+   
 
     
+async def init_db():
+    """Init the database with this async function"""
+    async with engine.begin() as conn:
+        await conn.run_sync(Base.metadata.create_all)
 
-    """
-    try:
-        async with engine.begin() as conn:
-            await conn.run_sync(meta.create_all)
-
-            await conn.execute(
-                Task_list_table.insert(), new_lask
-            )
-
-            return jsonify({"Result":f"Task called '{data['title']}' registered successfully!"})
-    except Exception as e:
-        print(e)
-        return jsonify({"Error": e})
-    """
-
+if __name__ == '__main__':
+    asyncio.run(init_db())
+    app.run(debug=True)
 
 
 
@@ -190,13 +200,6 @@ Add, edit, or delete tasks.
 Categorize tasks or set due dates.
 """
 
-async def init_db():
-    """Init the database with this async function"""
-    async with engine.begin() as conn:
-        await conn.run_sync(Base.metadata.create_all)
 
-if __name__ == '__main__':
-    asyncio.run(init_db())
-    app.run(debug=True)
 
     
