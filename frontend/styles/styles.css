@@ -61,13 +61,14 @@ textarea{
 .char-count {
     position: absolute;
     bottom: 5px;
-    right: 5px;
-    z-index: 2; /* Establece un orden de apilamiento para el conteo, de modo que aparezca encima del textarea */
-    background-color: rgba(255, 255, 255, 0.8); /* Fondo semitransparente para mejorar la legibilidad */
+    right: -100%;
+    z-index: 2; 
+    background-color: transparent; 
     padding: 0 5px; 
     font-size: 0.8em;
     color: #888;
-    pointer-events: none; /* Asegura que no interfiera con la interacción del textarea */
+
+    pointer-events: none; 
   }
 
 .title_container{

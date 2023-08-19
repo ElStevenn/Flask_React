@@ -16,15 +16,20 @@ function Title_input(){
 }
 
 function Textarea_input() {
+    const [actualWord, setActualWord] = useState("");
 
     function updateCounting() {
         const textarea = document.getElementById('text_area_');
         const counting = document.getElementById('conting');
         const lenght_ = textarea.value.length;
+
         if (lenght_ <= 3000){
             counting.textContent = `${lenght_}/3000`;
+            setActualWord(textarea.value);
         }else{
             counting.textContent = '3000/3000';
+            console.log(actualWord);
+            textarea.value = actualWord;
         }
         
     }
