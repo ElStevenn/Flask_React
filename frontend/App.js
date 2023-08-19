@@ -7,19 +7,51 @@ import axios from 'axios';
 function Title_input(){
     return(
         <>
-        <label for='title_input"'>Title:</label>
-        <input type='text' id="title_input"/>
+        <div className='title_container'>
+            <label for='title_input"'>Title</label>
+            <input type='text' id="title_input" />
+        </div>
         </>
     );
 }
 
-function Text_input() {
+function Textarea_input() {
+
+    function updateCounting() {
+        const textarea = document.getElementById('text_area_');
+        const counting = document.getElementById('conting');
+        const lenght_ = textarea.value.length;
+        if (lenght_ <= 3000){
+            counting.textContent = `${lenght_}/3000`;
+        }else{
+            counting.textContent = '3000/3000';
+        }
+        
+    }
+
+    document.addEventListener('input', function(e) {
+        if (e.target.tagName.toLowerCase() === 'textarea') {
+            autoresize(e.target);
+        }
+    });
+    
+    function autoresize(textarea) {
+        // Reset  height to 'auto' and set scrollHeiht + 2
+        textarea.style.height = 'auto';
+        textarea.style.height = (textarea.scrollHeight + 2) + 'px';
+
+    }
+
     return (
         <>
         <div className='text_input_div'>
-            <p>*configurations here*</p>
-            <label for='text_input'>Text</label>
-            <input type='text' id='text_input'/>
+            <label for='text_area_'>Text</label>
+            <div className='textarea-wrapper'>
+                <textarea autocapitalize="off" autoComplete="off" placeholder spellcheck="false" className='text_area' rows="5" cols="50" id="text_area_" onInput={updateCounting}></textarea>
+                <span id="conting" className='char-count'>0/300</span>
+            </div>
+            
+
         </div>
         </>
     );
@@ -28,11 +60,13 @@ function Text_input() {
 function Additional_inputs() {
     return(
         <>
-            <label for="add_option_1">Deadline:</label>
+        <div className='div_additional_inf'>
+            <label for="add_option_1">Deadline</label>
             <input type='datetime-local' id='add_option_1'/>
 
-            <label for="add_option_2">Deadline:</label>
+            <label for="add_option_2">Start day</label>
             <input type='date' id='add_option_2'/>
+        </div>
         </>
     );
 }
@@ -42,12 +76,10 @@ function PartInput() {
     return(
         <>
         <div className='input_div'>
-            <h2>Output Part</h2>
-            <p>*Something here*</p>
-            <p>*Something here*</p>
-            <p>*Something here*</p>
-            <p>*Something here*</p>
-            <button>SEND</button>
+            <Title_input />
+            <Textarea_input />
+            <Additional_inputs />
+            <a href="#" className='sendButton'>SEND</a>
         </div>
         </>
     )

@@ -12,6 +12,17 @@ h1{
     color: #496139;
     font-size: 50px;
     text-align: center;
+    overflow-y: hidden;  
+    resize: none;   
+}
+
+label {
+    font-weight: 700;
+    font-size: 19px;
+}
+
+button{
+    cursor: pointer;
 }
 
 .inputs_{
@@ -19,7 +30,97 @@ h1{
     
 }
 
+/*Input part styles*/
 .input_div {
     position: relative;
     top: 75%; 
+    display: block;
+    margin-left: 3%;
+    
 }
+
+textarea{
+    background: transparent;
+    font-family: Georgia, Times, 'Times New Roman', serif;
+    font-size: 24px;
+    line-height: 32px;
+    flex: 1;
+    resize: none;
+    width: 50%;
+    min-width: 600px;
+    white-space: pre-wrap;
+    display: flex;
+    border: solid black 2px;
+}
+
+.textarea-wrapper{
+    position: relative;
+    width: 300px;
+}
+
+.char-count {
+    position: absolute;
+    bottom: 5px;
+    right: 5px;
+    z-index: 2; /* Establece un orden de apilamiento para el conteo, de modo que aparezca encima del textarea */
+    background-color: rgba(255, 255, 255, 0.8); /* Fondo semitransparente para mejorar la legibilidad */
+    padding: 0 5px; 
+    font-size: 0.8em;
+    color: #888;
+    pointer-events: none; /* Asegura que no interfiera con la interacción del textarea */
+  }
+
+.title_container{
+    display: flex;
+    flex-direction: column;
+
+}
+
+.title_container input{
+    width: 32.54%;
+    height: 30px;
+    font-size: 30px;
+    background-color: transparent;
+    border: solid black 1px;
+}
+
+.div_additional_inf{
+    display: flex;
+    flex-direction: column;
+}
+
+.div_additional_inf input {
+    width: 100px;
+    height: 20px;
+
+}
+
+.sendButton {
+    margin-top: 10px;
+	box-shadow:inset 0px 1px 21px 0px #97c4fe;
+	background:linear-gradient(to bottom, #3d94f6 5%, #1e62d0 100%);
+	background-color:#3d94f6;
+	border-radius:6px;
+	border:1px solid #337fed;
+	display:inline-block;
+	cursor:pointer;
+	color:#ffffff;
+	font-family:Verdana;
+	font-size:24px;
+	font-weight:bold;
+	padding:8px 31px;
+	text-decoration:none;
+	text-shadow:1px 1px 12px #1570cd;
+}
+
+.sendButton:hover {
+	background:linear-gradient(to bottom, #1e62d0 5%, #3d94f6 100%);
+	background-color:#1e62d0;
+}
+
+.sendButton:active {
+	position:relative;
+	top:1px;
+}
+
+/*Output part styles*/
