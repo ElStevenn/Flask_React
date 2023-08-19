@@ -50,33 +50,38 @@ def main():
 
 @app.route('/get_task_and_ddbb', methods=['POST'])
 async def insert_database():
-    """Description here"""
+    """Insert a task into the database."""
     data = request.json
 
+    start_date_provided = False
+
     # Parsing start_day
-    start_year, start_month, start_day = map(int, data['start_day'].split('-'))
-    
+    if 'start_day' in data and data['start_day']:
+        start_date_provided = True
+        start_year, start_month, start_day_num = map(int, data['start_day'].split('-'))
+
     # Parsing DeadLine
     date_part, time_part = data['deadline'].split('T')
     year, month, day = map(int, date_part.split('-'))
-    hour, minute = map(int, time_part.split(':'))  
-   
+    hour, minute = map(int, time_part.split(':'))
+
     new_task = Task_list_table(
-        Title = data['title'], 
-        Text = data['text'], 
-        DeadLine = datetime(year, month, day, hour=hour, minute=minute), 
-        Start_Day = date(start_year, start_month, start_day)
+        Title=data['title'],
+        Text=data['text'],
+        DeadLine=datetime(year, month, day, hour=hour, minute=minute),
+        Start_Day=date(start_year, start_month, start_day_num) if start_date_provided else None
     )
 
     async with AsyncSessionLocal() as session:
         session.add(new_task)
         try:
-            await session.commit() # Try to comit
-            return jsonify({"Result":f"Task called '{data['title']}' registered successfully!"})
-        
+            await session.commit()  # Try to commit
+            return jsonify({"Result": f"Task called '{data['title']}' registered successfully!"})
+
         except Exception as e:
             print(str(e))
-            return jsonify({"Error": str(e)})
+            return jsonify({"Error": "Failed to process the request"})
+
    
 
     

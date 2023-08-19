@@ -90,19 +90,33 @@ function PartInput() {
             'title': Title,
             'text': Text_,
             'deadline': deadline,
-            'start_day': start_day
+            'start_day': start_day || null
         };
+    
 
         console.log(actualTask);
+        if (!Title){
+            // Title not found
+            console.log("Title is not null!");
+        } else if(!Text_) {
+            // Text not found
+            console.log("Text is not null!");
+        } else if (!deadline) {
+            // Deadline field not found
+            console.log("Deadline is not null");
+        } else {
 
-        // Send the data to API and then insert into DataBase
-        axios.post('http://localhost:5000/get_task_and_ddbb', actualTask)
+            // Send the data to API and then insert into DataBase
+            axios.post('http://localhost:5000/get_task_and_ddbb', actualTask)
             .then(response => {
                 console.log("Response:", response.data);
             })
             .catch(error => {
                 console.error("Error sending data:", error);
             });
+        }
+
+
     }
 
 
