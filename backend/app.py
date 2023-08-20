@@ -82,7 +82,34 @@ async def insert_database():
             print(str(e))
             return jsonify({"Error": "Failed to process the request"})
 
-   
+
+@app.route('/get_all_taks/')
+@app.route('/get_all_taks/<string:apiKey>')
+async def get_data(apiKey = None):
+    if apiKey == "12345" or apiKey == "abcde":
+        async with AsyncSessionLocal() as session:
+            try:
+                # Use select from SQLAlchemy to feth all tasks
+                stmt = select(Task_list_table)
+                result = await session.execute(stmt)
+                tasks = result.scalars().all()
+
+                # Convert ORM objects o dictionaries for JSON response
+                tasks_list = [{
+                    "ID": task.ID,
+                    "Title": task.Title,
+                    "Text": task.Text,
+                    "DeadLine": task.DeadLine.isoformat() if task.DeadLine else None,
+                    "Start_Day": task.Start_Day.isoformat() if task.Start_Day else None 
+                } for task in tasks]
+
+                return jsonify({"Response": tasks_list})
+            
+            except Exception as e:
+                print(e)
+                return jsonify({"Error":e})
+            
+    return jsonify({"Error":"You must introduce a correct API Key to get this data!"})
 
     
 async def init_db():

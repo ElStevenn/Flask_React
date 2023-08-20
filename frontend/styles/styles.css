@@ -1,3 +1,4 @@
+/*General styles*/
 body{
     background-color: lightgrey;
     font-family: 'Segoe UI';
@@ -16,6 +17,14 @@ h1{
     resize: none;   
 }
 
+h2{
+    font-size: 40px;
+    letter-spacing: -0.8px;
+    text-decoration: underline;
+    text-decoration-color: brown;
+    margin: 19px 0px 0px 0px;
+}
+
 label {
     font-weight: 700;
     font-size: 19px;
@@ -27,7 +36,6 @@ button{
 
 .inputs_{
     display: flex;
-    
 }
 
 /*Input part styles*/
@@ -125,3 +133,8 @@ textarea{
 }
 
 /*Output part styles*/
+.output_div{
+    position: relative;
+    display: block;
+    margin-left: 3%;
+}

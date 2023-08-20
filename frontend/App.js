@@ -23,9 +23,18 @@ function Textarea_input() {
         const counting = document.getElementById('conting');
         const lenght_ = textarea.value.length;
 
-        if (lenght_ <= 3000){
+        if (lenght_ <= 3500){
             counting.textContent = `${lenght_}/3000`;
             setActualWord(textarea.value);
+            counting.style.color = "#888";
+        }else if (lenght_ <= 3800){
+            counting.textContent = `${lenght_}/3000`;
+            setActualWord(textarea.value);
+            counting.style.color = "#bf7c00";
+        }else if (lenght_ <= 3000) {
+            counting.textContent = `${lenght_}/3000`;
+            setActualWord(textarea.value);
+            counting.style.color = "red";
         }else{
             counting.textContent = '3000/3000';
             console.log(actualWord);
@@ -53,7 +62,7 @@ function Textarea_input() {
             <label for='text_area_'>Text</label>
             <div className='textarea-wrapper'>
                 <textarea autoCapitalize="off" autoComplete="off"  autoCorrect='off' className='text_area' rows="5" cols="50" id="text_area_" onInput={updateCounting}></textarea>
-                <span id="conting" className='char-count'>0/300</span>
+                <span id="conting" className='char-count'>0/3000</span>
             </div>
             
 
@@ -97,13 +106,13 @@ function PartInput() {
         console.log(actualTask);
         if (!Title){
             // Title not found
-            console.log("Title is not null!");
+            alert("You haven't written the Title!");
         } else if(!Text_) {
             // Text not found
-            console.log("Text is not null!");
+            alert("You haven't written the Text!");
         } else if (!deadline) {
             // Deadline field not found
-            console.log("Deadline is not null");
+            alert("You haven't written the Deadline!");
         } else {
 
             // Send the data to API and then insert into DataBase
@@ -113,6 +122,7 @@ function PartInput() {
             })
             .catch(error => {
                 console.error("Error sending data:", error);
+                // add here alert();
             });
         }
 
@@ -133,10 +143,30 @@ function PartInput() {
     )
 }
 
+function ListsOfTasks({tasks}) {
+    return(
+        <>
+        </>
+    );
+}
 
 
 function PartOutput() {
-    return;
+    const [taks, setTaks] = useState("");
+
+    function getAllTaks() {
+        return;
+    }
+
+
+    return(
+        <>
+        <div className='output_div'>
+            <h2>TASK VIEW</h2>
+            <ListsOfTasks />
+        </div>
+        </>
+    );
 }
 
 
