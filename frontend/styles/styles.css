@@ -138,3 +138,48 @@ textarea{
     display: block;
     margin-left: 3%;
 }
+
+.ListOfTasks{
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.Sigle_Tak{
+    background-color: lightblue;
+    border: solid black 2px;
+    border-radius: 10px;
+    margin: 10px;
+    padding: 10px;
+    min-width: 300px;
+    max-width: 400px;
+    display: flex;
+    flex-direction: column;
+}
+
+.Sigle_Tak h3{
+    text-align: center;
+    margin: 0px 0px 0px 0px;
+}
+
+.Sigle_Tak p {
+    display: block;
+    margin-bottom: 0.75rem;
+    word-wrap: break-word;
+
+}
+
+.botton_info {
+    display: flex;
+    margin: 0px 0px 0px 0px;
+    justify-content: space-between
+
+}
+
+.botton_info p {
+    margin: 0px 0px 0px 0px;
+}
+
+.botton_info h5 {
+    margin: 0px 0px 0px 0px;
+}

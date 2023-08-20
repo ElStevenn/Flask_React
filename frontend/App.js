@@ -1,21 +1,25 @@
 
 import './styles/styles.css';
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect } from 'react';
 import axios from 'axios';
+import three_points from './images/list.png';
 
 
-function Title_input(){
+
+function Title_input({titleWord, setTitleWord}){
+    // Title imput, where I write the title of the task
     return(
         <>
         <div className='title_container'>
             <label for='title_input"'>Title</label>
-            <input type='text' id="title_input" />
+            <input type='text' id="title_input" onChange={(e) => setTitleWord(e.target.value)} value={titleWord}/>
         </div>
         </>
     );
 }
 
-function Textarea_input() {
+function Textarea_input({textWord, setTextWord}) {
+    // *Add description here*
     const [actualWord, setActualWord] = useState("");
 
     function updateCounting() {
@@ -23,20 +27,20 @@ function Textarea_input() {
         const counting = document.getElementById('conting');
         const lenght_ = textarea.value.length;
 
-        if (lenght_ <= 3500){
-            counting.textContent = `${lenght_}/3000`;
+        if (lenght_ <= 250){
+            counting.textContent = `${lenght_}/300`;
             setActualWord(textarea.value);
             counting.style.color = "#888";
-        }else if (lenght_ <= 3800){
-            counting.textContent = `${lenght_}/3000`;
+        }else if (lenght_ <= 280){
+            counting.textContent = `${lenght_}/300`;
             setActualWord(textarea.value);
             counting.style.color = "#bf7c00";
-        }else if (lenght_ <= 3000) {
-            counting.textContent = `${lenght_}/3000`;
+        }else if (lenght_ <= 300) {
+            counting.textContent = `${lenght_}/300`;
             setActualWord(textarea.value);
             counting.style.color = "red";
         }else{
-            counting.textContent = '3000/3000';
+            counting.textContent = '300/300';
             console.log(actualWord);
             textarea.value = actualWord;
         }
@@ -58,20 +62,30 @@ function Textarea_input() {
 
     return (
         <>
-        <div className='text_input_div'>
-            <label for='text_area_'>Text</label>
-            <div className='textarea-wrapper'>
-                <textarea autoCapitalize="off" autoComplete="off"  autoCorrect='off' className='text_area' rows="5" cols="50" id="text_area_" onInput={updateCounting}></textarea>
-                <span id="conting" className='char-count'>0/3000</span>
+            <div className='text_input_div'>
+                <label htmlFor='text_area_'>Text</label>
+                <div className='textarea-wrapper'>
+                    <textarea 
+                        autoCapitalize="off" 
+                        autoComplete="off"  
+                        autoCorrect='off' 
+                        className='text_area' 
+                        rows="5" 
+                        cols="50" 
+                        id="text_area_" 
+                        onInput={updateCounting} 
+                        onChange={(e) => setTextWord(e.target.value)} 
+                        value={textWord}
+                    ></textarea>
+                    <span id="conting" className='char-count'>0/300</span>
+                </div>
             </div>
-            
-
-        </div>
         </>
     );
 }
 
 function Additional_inputs() {
+    // Additional imputs such as Deadline and Start Day
     return(
         <>
         <div className='div_additional_inf'>
@@ -85,10 +99,11 @@ function Additional_inputs() {
     );
 }
 
-
 function PartInput() {
-
-
+    // *Add description here*
+    const [titleWord, setTitleWord] = useState("");
+    const [textWord, setTextWord] = useState("");
+    
     function add_new_task() {
         let Title = document.getElementById('title_input').value;
         let Text_ = document.getElementById('text_area_').value;
@@ -106,14 +121,19 @@ function PartInput() {
         console.log(actualTask);
         if (!Title){
             // Title not found
+            console.error("Title is required.");
             alert("You haven't written the Title!");
         } else if(!Text_) {
             // Text not found
+            console.error("Text is required.");
             alert("You haven't written the Text!");
         } else if (!deadline) {
             // Deadline field not found
+            console.error("Deadline is required.");
             alert("You haven't written the Deadline!");
         } else {
+            setTitleWord("");
+            setTextWord("");
 
             // Send the data to API and then insert into DataBase
             axios.post('http://localhost:5000/get_task_and_ddbb', actualTask)
@@ -124,7 +144,7 @@ function PartInput() {
                 console.error("Error sending data:", error);
                 // add here alert();
             });
-        }
+        }         
 
 
     }
@@ -134,8 +154,8 @@ function PartInput() {
     return(
         <>
         <div className='input_div'>
-            <Title_input />
-            <Textarea_input />
+            <Title_input titleWord={titleWord} setTitleWord={setTitleWord}/>
+            <Textarea_input textWord={textWord} setTextWord={setTextWord}/>
             <Additional_inputs />
             <a href="#" className='sendButton' onClick={add_new_task}>SEND</a>
         </div>
@@ -143,27 +163,68 @@ function PartInput() {
     )
 }
 
-function ListsOfTasks({tasks}) {
+function conf_task({ID}) {
+    // This will be a task manager where I'll can delete and modify the task.
     return(
         <>
+            <button>/image/</button>
         </>
+    )
+}
+function SingleTask({Title, Text, DeadLine, Start_Day, ID}) {
+    // Single task with its distrivutrion
+    return(
+        <div className='Sigle_Tak'>
+            <h3>{Title}</h3>
+            <p>{Text}</p>
+            <div className='botton_info'>
+                <h5>{Start_Day ? `SD: ${Start_Day}` : ""}</h5>
+                <h5>DL: {DeadLine[0]} at {DeadLine[1]}</h5>
+            </div>
+        </div>
+    )
+}
+
+function ListsOfTasks({tasks}) {
+    // List of tasks mang
+    return(
+        <div className='ListOfTasks'>
+            {tasks.map((fields, b) => (
+                <SingleTask 
+                    key={b} 
+                    Title={fields.Title} 
+                    Text={fields.Text} 
+                    DeadLine={fields.DeadLine} 
+                    Start_Day={fields.Start_Day}
+                    ID={fields.ID}
+                />
+            ))}
+        </div>
     );
 }
 
 
 function PartOutput() {
-    const [taks, setTaks] = useState("");
+    // Output part, witch means geting data from API
+    let APIKey = "12345";
+    const [taks, setTaks] = useState([]);
 
-    function getAllTaks() {
-        return;
-    }
+    // GET tasks from API
+    useEffect(() =>{
+        fetch(`/get_all_taks/${APIKey}`).then((res) => 
+            res.json().then((data) => {
+                setTaks(
+                    data.Response
+                )
+            }))
+    })
 
 
     return(
         <>
         <div className='output_div'>
             <h2>TASK VIEW</h2>
-            <ListsOfTasks />
+            <ListsOfTasks tasks={taks}/>
         </div>
         </>
     );

@@ -83,7 +83,7 @@ async def insert_database():
             return jsonify({"Error": "Failed to process the request"})
 
 
-@app.route('/get_all_taks/')
+@app.route('/get_all_taks')
 @app.route('/get_all_taks/<string:apiKey>')
 async def get_data(apiKey = None):
     if apiKey == "12345" or apiKey == "abcde":
@@ -99,7 +99,7 @@ async def get_data(apiKey = None):
                     "ID": task.ID,
                     "Title": task.Title,
                     "Text": task.Text,
-                    "DeadLine": task.DeadLine.isoformat() if task.DeadLine else None,
+                    "DeadLine": [part if c == 0 else part[:-3] for c, part in enumerate(task.DeadLine.isoformat().split('T'))] if task.DeadLine else None,
                     "Start_Day": task.Start_Day.isoformat() if task.Start_Day else None 
                 } for task in tasks]
 
