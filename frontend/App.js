@@ -163,21 +163,47 @@ function PartInput() {
     )
 }
 
-function Conf_task({ID}) {
+function Conf_task({ID, task_conf_func}) {
     // This will be a task manager where I'll can delete and modify the task.
+
+
     return(
         <>
-            <button><img src={three_points} alt='three points button'></img></button>
+            <button onClick={() => task_conf_func(ID)}><img src={three_points} alt='three points button'></img></button>
+            {}
         </>
     )
 }
 function SingleTask({Title, Text, DeadLine, Start_Day, ID}) {
+    
+    function Remove_tak_func(ID) {
+        console.log("*Removing this task -> * " + ID);
+    }
+
+    function Edit_Task_fuinc(ID) {
+        console.log("*Editing this task -> *" + ID);
+    }
+
+    function task_conf_func(ID) {
+        console.log("Task configuration func is actually working...")
+        return(
+            <>
+                <div className='task_conf_div'>
+                    <a href='#' onClick={() => Remove_tak_func(ID)}>Remove</a>
+                    <a href='#' onClick={() => Edit_Task_fuinc(ID)}>Edit</a>
+                </div>
+            </>
+        );
+    }
+
+
+
     // Single task with its distrivutrion
     return(
         <div className='Sigle_Tak'>
             <div className='top_part_task'>
                 <h3>{Title}</h3>
-                <Conf_task ID={null}/>
+                <Conf_task ID={ID} task_conf_func={task_conf_func}/>
             </div>
             
             <p>{Text}</p>

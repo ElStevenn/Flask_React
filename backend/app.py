@@ -86,6 +86,7 @@ async def insert_database():
 @app.route('/get_all_taks')
 @app.route('/get_all_taks/<string:apiKey>')
 async def get_data(apiKey = None):
+    """Get all posts from the database and send to frontend"""
     if apiKey == "12345" or apiKey == "abcde":
         async with AsyncSessionLocal() as session:
             try:
@@ -109,10 +110,31 @@ async def get_data(apiKey = None):
                 print(e)
                 return jsonify({"Error":e})
             
-    return jsonify({"Error":"You must introduce a correct API Key to get this data!"})
+    return jsonify({"Error":"You must enter a correct API Key to get this data!"})
 
 
+@app.route('/remove_single_task')
+@app.route('/remove_single_task/<string:apiKey>')
+@app.route('/remove_single_task/<string:apiKey>/<string:task_id>')
+async def remove_task(task_id = None, apiKey = None):
+    """Delete a task from the database with its ID. Apikey is required"""
+    if apiKey == "12345" or apiKey == "abcde":
+        async with AsyncSessionLocal() as sess:
+            try:
+                select_task = await sess.execute(select(Task_list_table).filter_by(ID=task_id))
+                task_instance = select_task.scalar_one_or_none()       
+                if not task_instance: # In case task not found
+                    return jsonify({"Response": {"Message": f"No task found with ID {task_id}", "Status":"Error"}})
+                await sess.delete(task_instance)
+                await sess.commit()
 
+                return jsonify({"Response": {"Message": f" Task {task_id} removed!", "Status": "Success"}})
+            
+            except Exception as e:
+                print(e)
+                return jsonify({"Error":e})                
+
+    return jsonify({"Error": "You must enter a correct API Key to get this data, this way -> /remove_single_task/<apiKey>/<task_id>"})
 
 
 
