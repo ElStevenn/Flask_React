@@ -147,7 +147,7 @@ textarea{
 
 .Sigle_Tak{
     background-color: lightblue;
-    border: solid black 2px;
+    border: solid grey 1px;
     border-radius: 10px;
     margin: 10px;
     padding: 10px;
@@ -155,31 +155,55 @@ textarea{
     max-width: 400px;
     display: flex;
     flex-direction: column;
-}
-
-.Sigle_Tak h3{
-    text-align: center;
-    margin: 0px 0px 0px 0px;
+    box-shadow: 1px 0px 12px gray;
 }
 
 .Sigle_Tak p {
     display: block;
     margin-bottom: 0.75rem;
     word-wrap: break-word;
-
 }
 
 .botton_info {
     display: flex;
-    margin: 0px 0px 0px 0px;
-    justify-content: space-between
-
+    margin: 0;
+    justify-content: space-between;
 }
 
-.botton_info p {
-    margin: 0px 0px 0px 0px;
+.botton_info p, .botton_info h5 {
+    margin: 0;
 }
 
-.botton_info h5 {
-    margin: 0px 0px 0px 0px;
+.top_part_task {
+    position: relative;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+    padding: 10px;
 }
+
+.top_part_task h3 {
+    text-align: center;
+    margin: 0;
+    z-index: 1;
+}
+
+.top_part_task button {
+    position: absolute;
+    right: 20px; /*Modify button position*/
+    top: 30%;
+    transform: translateY(-50%);
+    z-index: 2;
+    background-color: transparent;
+    border: none;
+    padding: 0px 0px 0px 0px;
+    width: 30;
+    height: 30px;
+}
+
+.top_part_task > button img {
+    width: 30px;
+    
+}
+

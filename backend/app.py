@@ -111,7 +111,11 @@ async def get_data(apiKey = None):
             
     return jsonify({"Error":"You must introduce a correct API Key to get this data!"})
 
-    
+
+
+
+
+
 async def init_db():
     """Init the database with this async function"""
     async with engine.begin() as conn:

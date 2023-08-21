@@ -163,11 +163,11 @@ function PartInput() {
     )
 }
 
-function conf_task({ID}) {
+function Conf_task({ID}) {
     // This will be a task manager where I'll can delete and modify the task.
     return(
         <>
-            <button>/image/</button>
+            <button><img src={three_points} alt='three points button'></img></button>
         </>
     )
 }
@@ -175,7 +175,11 @@ function SingleTask({Title, Text, DeadLine, Start_Day, ID}) {
     // Single task with its distrivutrion
     return(
         <div className='Sigle_Tak'>
-            <h3>{Title}</h3>
+            <div className='top_part_task'>
+                <h3>{Title}</h3>
+                <Conf_task ID={null}/>
+            </div>
+            
             <p>{Text}</p>
             <div className='botton_info'>
                 <h5>{Start_Day ? `SD: ${Start_Day}` : ""}</h5>
