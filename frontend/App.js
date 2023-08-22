@@ -163,68 +163,82 @@ function PartInput() {
     )
 }
 
-function Conf_task({ID, task_conf_func}) {
-    // This will be a task manager where I'll can delete and modify the task.
-
-
-    return(
+function Conf_task({ ID, task_conf_func, conf_widget }) {
+    return (
         <>
-            <button onClick={() => task_conf_func(ID)}><img src={three_points} alt='three points button'></img></button>
-            {}
+            <button onClick={() => task_conf_func(ID)}>
+                <img src={three_points} alt='three points button'></img>
+            </button>
+            {conf_widget}
         </>
-    )
+    );
 }
-function SingleTask({Title, Text, DeadLine, Start_Day, ID}) {
-    
-    function Remove_tak_func(ID) {
-        console.log("*Removing this task -> * " + ID);
+
+function SingleTask({ Title, Text, DeadLine, Start_Day, ID }) {
+    // 
+    const [conf_widget, setConf_widget] = useState(null);
+    const [optVisible, setOptVisible] = useState(false);
+    let apiKey = "12345";
+
+    async function Remove_tak_func(ID) {
+        // Send to backend a request ro remove the task
+
+        try {
+            const response = await fetch(`http://localhost:5000/remove_single_task/${apiKey}/${ID}`);
+
+            if (!response.ok) {
+                throw new Error("Network response was not ok");
+            }
+
+            console.log("task removed successfully!");
+        } catch (err) {
+            console.error("Error:", err);
+        }
     }
 
     function Edit_Task_fuinc(ID) {
         console.log("*Editing this task -> *" + ID);
     }
 
-    function task_conf_func(ID) {
-        console.log("Task configuration func is actually working...")
-        return(
-            <>
+    function task_conf_func() {
+        if (optVisible) {
+            setConf_widget(null);
+        } else {
+            setConf_widget(
                 <div className='task_conf_div'>
-                    <a href='#' onClick={() => Remove_tak_func(ID)}>Remove</a>
-                    <a href='#' onClick={() => Edit_Task_fuinc(ID)}>Edit</a>
+                    <a href='#' onClick={(e) => { e.preventDefault(); Remove_tak_func(ID); }}>Remove</a>
+                    <a href='#' onClick={(e) => { e.preventDefault(); Edit_Task_fuinc(ID); }}>Edit</a>
                 </div>
-            </>
-        );
+            );
+        }
+        setOptVisible(!optVisible); // This should be outside the if-else block.
     }
 
-
-
-    // Single task with its distrivutrion
-    return(
+    return (
         <div className='Sigle_Tak'>
             <div className='top_part_task'>
                 <h3>{Title}</h3>
-                <Conf_task ID={ID} task_conf_func={task_conf_func}/>
+                <Conf_task ID={ID} task_conf_func={task_conf_func} conf_widget={conf_widget} />
             </div>
-            
+
             <p>{Text}</p>
             <div className='botton_info'>
                 <h5>{Start_Day ? `SD: ${Start_Day}` : ""}</h5>
                 <h5>DL: {DeadLine[0]} at {DeadLine[1]}</h5>
             </div>
         </div>
-    )
+    );
 }
 
-function ListsOfTasks({tasks}) {
-    // List of tasks mang
-    return(
+function ListsOfTasks({ tasks }) {
+    return (
         <div className='ListOfTasks'>
             {tasks.map((fields, b) => (
-                <SingleTask 
-                    key={b} 
-                    Title={fields.Title} 
-                    Text={fields.Text} 
-                    DeadLine={fields.DeadLine} 
+                <SingleTask
+                    key={b}
+                    Title={fields.Title}
+                    Text={fields.Text}
+                    DeadLine={fields.DeadLine}
                     Start_Day={fields.Start_Day}
                     ID={fields.ID}
                 />
@@ -232,6 +246,7 @@ function ListsOfTasks({tasks}) {
         </div>
     );
 }
+
 
 
 function PartOutput() {

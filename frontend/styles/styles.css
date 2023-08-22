@@ -151,8 +151,7 @@ textarea{
     border-radius: 10px;
     margin: 10px;
     padding: 10px;
-    min-width: 300px;
-    max-width: 400px;
+    width: 400px;
     display: flex;
     flex-direction: column;
     box-shadow: 1px 0px 12px gray;
@@ -204,6 +203,25 @@ textarea{
 
 .top_part_task > button img {
     width: 30px;
-    
+}
+
+.task_conf_div {
+    position: absolute;
+    display: flex;
+    top: 20px;  /*Change this to set new position*/
+    left: 82%;
+    background-color: rgba(255, 255, 255, 0.7); /* Blanco con 50% de opacidad */
+    border: none;
+    padding: 5px;
+    flex-direction: column;
+    border-radius: 5px;
+}
+
+.task_conf_div a {
+  margin: 0; 
+  padding: 5px;
+  text-decoration: none;
+  font-weight: 700;
+
 }
 
