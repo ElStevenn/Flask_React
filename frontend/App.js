@@ -84,25 +84,28 @@ function Textarea_input({textWord, setTextWord}) {
     );
 }
 
-function Additional_inputs() {
+function Additional_inputs({deadlineWord, setdeadlineWord, startdayWord, setStartdayWord}) {
     // Additional imputs such as Deadline and Start Day
     return(
         <>
         <div className='div_additional_inf'>
             <label for="add_option_1">Deadline</label>
-            <input type='datetime-local' id='add_option_1'/>
+            <input type='datetime-local' id='add_option_1' onChange={(e) => setdeadlineWord(e.target.value)} value={deadlineWord}/>
 
             <label for="add_option_2">Start day</label>
-            <input type='date' id='add_option_2'/>
+            <input type='date' id='add_option_2' onChange={(e) => setStartdayWord(e.target.value)} value={startdayWord}/>
         </div>
         </>
     );
 }
 
 function PartInput() {
-    // *Add description here*
+    // All input part, witch means all related whith introduce data into the database.
     const [titleWord, setTitleWord] = useState("");
     const [textWord, setTextWord] = useState("");
+    const initialDateTime = '';
+    const [deadlineWord, setdeadlineWord] = useState(initialDateTime);
+    const [startdayWord, setStartdayWord] = useState(initialDateTime);
     
     function add_new_task() {
         let Title = document.getElementById('title_input').value;
@@ -134,6 +137,8 @@ function PartInput() {
         } else {
             setTitleWord("");
             setTextWord("");
+            setdeadlineWord(initialDateTime);
+            setStartdayWord(initialDateTime);
 
             // Send the data to API and then insert into DataBase
             axios.post('http://localhost:5000/get_task_and_ddbb', actualTask)
@@ -141,22 +146,18 @@ function PartInput() {
                 console.log("Response:", response.data);
             })
             .catch(error => {
-                console.error("Error sending data:", error);
-                // add here alert();
+                // in case the API doesn't work
+                alert("An error has occured!");
             });
-        }         
-
-
+        }   
     }
-
-
 
     return(
         <>
         <div className='input_div'>
             <Title_input titleWord={titleWord} setTitleWord={setTitleWord}/>
             <Textarea_input textWord={textWord} setTextWord={setTextWord}/>
-            <Additional_inputs />
+            <Additional_inputs deadlineWord={deadlineWord} setdeadlineWord={setdeadlineWord} startdayWord={startdayWord} setStartdayWord={setStartdayWord}/>
             <a href="#" className='sendButton' onClick={add_new_task}>SEND</a>
         </div>
         </>
@@ -175,7 +176,7 @@ function Conf_task({ ID, task_conf_func, conf_widget }) {
 }
 
 function SingleTask({ Title, Text, DeadLine, Start_Day, ID }) {
-    // 
+    // *add description here*
     const [conf_widget, setConf_widget] = useState(null);
     const [optVisible, setOptVisible] = useState(false);
     let apiKey = "12345";
@@ -185,11 +186,9 @@ function SingleTask({ Title, Text, DeadLine, Start_Day, ID }) {
 
         try {
             const response = await fetch(`http://localhost:5000/remove_single_task/${apiKey}/${ID}`);
-
             if (!response.ok) {
                 throw new Error("Network response was not ok");
             }
-
             console.log("task removed successfully!");
         } catch (err) {
             console.error("Error:", err);
@@ -231,22 +230,29 @@ function SingleTask({ Title, Text, DeadLine, Start_Day, ID }) {
 }
 
 function ListsOfTasks({ tasks }) {
-    return (
-        <div className='ListOfTasks'>
-            {tasks.map((fields, b) => (
-                <SingleTask
-                    key={b}
-                    Title={fields.Title}
-                    Text={fields.Text}
-                    DeadLine={fields.DeadLine}
-                    Start_Day={fields.Start_Day}
-                    ID={fields.ID}
-                />
-            ))}
-        </div>
-    );
+    if (tasks){
+        return (
+            <div className='ListOfTasks'>
+                {tasks.map((fields, b) => (
+                    <SingleTask
+                        key={b}
+                        Title={fields.Title}
+                        Text={fields.Text}
+                        DeadLine={fields.DeadLine}
+                        Start_Day={fields.Start_Day}
+                        ID={fields.ID}
+                    />
+                ))}
+            </div>
+        );
+    } else {
+        return (
+            <div className='ErrorMesage'>
+                <h3>Module not found :(</h3>
+            </div>
+        );
+    }
 }
-
 
 
 function PartOutput() {
@@ -262,6 +268,9 @@ function PartOutput() {
                     data.Response
                 )
             }))
+        .catch(() => {
+            setTaks(null);
+        })
     })
 
 

@@ -137,6 +137,13 @@ async def remove_task(task_id = None, apiKey = None):
     return jsonify({"Error": "You must enter a correct API Key to get this data, this way -> /remove_single_task/<apiKey>/<task_id>"})
 
 
+@app.route("/return_something")
+@app.route("/return_something/<string:arg>")
+def return_something(arg = None):
+    result = list(arg.split('_'))
+
+    return jsonify({"Argument": str(" ".join(result) + " -> Your mum with a thong!")})
+
 
 
 
