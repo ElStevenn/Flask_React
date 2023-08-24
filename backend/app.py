@@ -44,6 +44,8 @@ async def write_task_to_file_txt(task):
         await f.write(f"{task['title']}, {task['text']}, {task['deadline']}, {task['start_day']}")
 
 
+
+
 @app.route('/')
 def main():
     return "<h1>Server is runing!</h1>"
@@ -135,6 +137,44 @@ async def remove_task(task_id = None, apiKey = None):
                 return jsonify({"Error":e})                
 
     return jsonify({"Error": "You must enter a correct API Key to get this data, this way -> /remove_single_task/<apiKey>/<task_id>"})
+
+
+@app.route('/edit_single_task')
+@app.route('/edit_single_task/<string:apiKey>')
+@app.route('/edit_single_task/<string:apiKey>/<string:task_id>', methods=['POST','GET'])
+async def edit_task(apiKey = None, task_id=None):
+    """
+    Endpoint to edit a single task based on its ID.
+    """
+    if apiKey not in ['12345','abcde']:
+        return jsonify({"Error": "You must enter a correct API Key to get this data, this way -> /remove_single_task/<apiKey>/<task_id>"})
+
+    data = request.json
+    async with AsyncSessionLocal() as sess:
+        
+        # Select task based on ID
+        stmt = sess.execute(select(Task_list_table).filter_by(ID=task_id).limit(1)) # Select table 
+        task_instance = stmt.scalar_one_or_none()  
+
+        if task_instance: # In case task not found
+            return jsonify({"Response": f"Task {task_id} not found!", "Status": "Error"})
+        
+        # Update task fields
+        if data.get('NewLine'):
+            task_instance.Line = data['NewLine']
+        if data.get('NewText'):
+            task_instance.Text = data['NewText']
+        if data.get('NewDeadline'):
+            task_instance.Deadline = data['NewDeadline']
+        if data.get('NewStartDay'):
+            task_instance.StartDay = data['NewStartDay']
+
+        # Commit chages
+        await sess.commit()
+
+
+    return jsonify({"Message":"This module is actually making"})   
+
 
 
 @app.route("/return_something")
