@@ -173,8 +173,37 @@ async def edit_task(apiKey = None, task_id=None):
         await sess.commit()
 
 
-    return jsonify({"Message":"This module is actually making"})   
+    return jsonify({"Message":"This module is actually making! (Change this shit pau please)"})   
 
+@app.route('/return_single_task/<string:apiKey>')
+@app.route('/return_single_task/<string:apiKey>/<string:task_id>')
+async def send_single_task(apiKey = None, task_id = None):
+    """Return a single task from its ID"""
+    if apiKey not in ['12345','abcde']:
+        return jsonify({"Error":"Invalid apiKey"})
+    
+    try:
+        async with AsyncSessionLocal() as sess:
+            # Execute query
+            result = await sess.execute(select(Task_list_table).filter_by(ID=task_id))
+            task_instance = result.scalar_one_or_none()
+
+            if not task_instance: # Check if the task doesn't exist
+                return jsonify({"Response": {"Message": f"Task {task_id} not found", "Status": "Error"}})
+
+            task = {
+                "ID": task_instance.ID,
+                "Title": task_instance.Title,
+                "Text": task_instance.Text,
+                "Deadline": task_instance.DeadLine if task_instance.DeadLine else None,
+                "Start_day": task_instance.Start_Day if task_instance.Start_Day else None 
+            }  
+
+            return jsonify({"Result": task})
+
+
+    except Exception as e:
+        return jsonify({"Error":{"Message": "Input error (GET /return_single_task/<string:apiKey>/<string:task_id>)", "Type":"Input Error", "Info": str(e)}})
 
 
 @app.route("/return_something")
@@ -196,7 +225,7 @@ def return_something(arg = None):
 def page_not_found(e):
     error_mesage = {
     "error": {
-        "message": "Invalid URL (GET /remove_single_task | /get_all_taks | /edit_single_task | POST /get_task_and_ddbb )",
+        "message": "Invalid URL (GET /remove_single_task | /get_all_taks | /reurn_single_task | /edit_single_task | POST /get_task_and_ddbb )",
         "type": "invalid_request_error",
         "param": None,
         "code": None

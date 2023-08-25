@@ -63,7 +63,7 @@ function Textarea_input({textWord, setTextWord}) {
     return (
         <>
             <div className='text_input_div'>
-                <label htmlFor='text_area_'>Text</label>
+                <label for='text_area_'>Text</label>
                 <div className='textarea-wrapper'>
                     <textarea 
                         autoCapitalize="off" 
@@ -164,7 +164,68 @@ function PartInput() {
     )
 }
 
+function Edit_task_opt ({task_id}) {
+    // Interface of edit task (imporve this description)
+
+    // By the way, end this Pau please!
+    if (task_id) {
+        return(
+            <>
+                <div className='Edit_task_div'>
+                    <h3>EDIT TASK</h3>
+                    <div className='Edit_name'>
+                        <label for="Edit_name_">Name</label>
+                        <input type="text" id='Edit_name_'/>
+                    </div>
+                    <div className='Edit_Text'>
+                        <label for >Text</label>
+                        <textarea
+                            autoCapitalize="off" 
+                            autoComplete="off"  
+                            autoCorrect='off' 
+                            className='text_area'
+                            if='edt_text_area'
+                        ></textarea>
+                    </div>
+                    <div className='Edit_aditional_input'>
+                        <label for="edit_deadline">Deadline</label>
+                        <input id="edit_deadline" type='text'></input>
+
+                        <label for="edit_deadline">Deadline</label>
+                        <input id="edit_deadline" type='text'></input>
+                    </div>
+                </div>
+            </>
+        );
+    }else{
+        return;
+    }
+}
+
+async function get_task_from_id({ ID }) {
+    // GET task from its ID
+    let apiKey = "12345";
+
+    try {
+        const response = await fetch(`http://localhost:5000/return_single_task/${apiKey}/${ID}`);
+
+        if (!response.ok) {
+            throw new Error(`Server responded with a status of ${response.status}`);
+        }
+
+        const data = await response.json();
+        console.log("Full response data:", data);
+        return data['Result'];
+
+    } catch (err) {
+        console.log("Error:", err);
+        return false; // Note: lowercase 'f' in 'false'
+    }
+}
+
+
 function Conf_task({ ID, task_conf_func, conf_widget }) {
+    // configuration single task
     return (
         <>
             <button onClick={() => task_conf_func(ID)}>
@@ -195,9 +256,22 @@ function SingleTask({ Title, Text, DeadLine, Start_Day, ID }) {
         }
     }
 
-    function Edit_Task_fuinc(ID) {
-        console.log("*Editing this task -> *" + ID);
-    }
+    async function Edit_Task_fuinc() {
+        let result = await get_task_from_id({ ID: 'someID' });
+        console.log(result);
+
+
+
+
+        
+    };
+
+
+
+
+
+
+    
 
     function task_conf_func() {
         if (optVisible) {
@@ -289,6 +363,7 @@ export default function Main(){
     return(
         <div className='general_div'>
             <PartInput />
+            <Edit_task_opt />
             <PartOutput />
         </div>
     );
