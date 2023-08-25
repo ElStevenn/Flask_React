@@ -82,7 +82,7 @@ async def insert_database():
 
         except Exception as e:
             print(str(e))
-            return jsonify({"Error": "Failed to process the request"})
+            return jsonify({"Error":{"Message":"(POST /get_task_and_ddbb)","Type":"ConnectionError","Param":None}})
 
 
 @app.route('/get_all_taks')
@@ -112,7 +112,7 @@ async def get_data(apiKey = None):
                 print(e)
                 return jsonify({"Error":e})
             
-    return jsonify({"Error":"You must enter a correct API Key to get this data!"})
+    return jsonify({"Error":"Error url, you don't provided the API key (GET /get_all_taks/<string:apiKey> )"})
 
 
 @app.route('/remove_single_task')
@@ -136,7 +136,7 @@ async def remove_task(task_id = None, apiKey = None):
                 print(e)
                 return jsonify({"Error":e})                
 
-    return jsonify({"Error": "You must enter a correct API Key to get this data, this way -> /remove_single_task/<apiKey>/<task_id>"})
+    return jsonify({"Error": "Invalid URL (GET /remove_single_task/<apiKey>/<task_id>)"})
 
 
 @app.route('/edit_single_task')
@@ -147,7 +147,7 @@ async def edit_task(apiKey = None, task_id=None):
     Endpoint to edit a single task based on its ID.
     """
     if apiKey not in ['12345','abcde']:
-        return jsonify({"Error": "You must enter a correct API Key to get this data, this way -> /remove_single_task/<apiKey>/<task_id>"})
+        return jsonify({"Error": "Invalid URL (POST GET /remove_single_task/<apiKey>/<task_id>)"})
 
     data = request.json
     async with AsyncSessionLocal() as sess:
@@ -182,10 +182,27 @@ async def edit_task(apiKey = None, task_id=None):
 def return_something(arg = None):
     result = list(arg.split('_'))
 
-    return jsonify({"Argument": str(" ".join(result) + " -> Your mum with a thong!")})
+    MyResult = {"Result": {
+        "message": "Your mum is a thong! -> " + str(" ".join(result)),
+        "type": "invalid_request_error",
+        "param": None,
+        "code": None}
+    }
+
+    return jsonify(MyResult)
 
 
-
+@app.errorhandler(404)
+def page_not_found(e):
+    error_mesage = {
+    "error": {
+        "message": "Invalid URL (GET /remove_single_task | /get_all_taks | /edit_single_task | POST /get_task_and_ddbb )",
+        "type": "invalid_request_error",
+        "param": None,
+        "code": None
+    }
+}
+    return jsonify(error_mesage)
 
 async def init_db():
     """Init the database with this async function"""
@@ -197,116 +214,3 @@ if __name__ == '__main__':
     app.run(debug=True)
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-"""
-async def get_email_users():
-    async with engine.begin() as conn:
-        result = await conn.execute(select(MiniTable))
-        await conn.run_sync()
-        return result
-
-async def save_user_email(user,email):
-    '''This function I just save the user and email'''
-    async with open("myFile", "w") as f:
-        await f.write(f"{user} - {email}")
-
-
-@app.route('/test')
-def test():
-    return jsonify({"Name":"Mr Potatoe!"})
-
-
-
-@app.route('/show_emails_users')
-async def showEmails():
-    async def get_emails():
-        emails = await get_email_users()
-        return emails
-    
-    result = asyncio.gather(get_emails())
-
-    return f"<p>{result}</p>"
-
-
-    
-
-
-@app.route("/receive", methods=['POST'])
-async def receive_data():
-    data = request.json
-    new_user = MiniTable(Name=data['name'], Email=data['email'])
-
-
-    async with AsyncSessionLocal() as session:  # Asynchronous session
-        session.add(new_user)
-        try:
-            await session.commit()  # Commit the changes asynchronously
-            return jsonify({"Message": f"Data received! {data['name']}, {data['email']}"})
-        except Exception as e:
-            await session.rollback()  # Rollback if there's an error
-            return jsonify({"Error": str(e)})
-
-"""  
-
-
-
-
-"""Diferents HTTP methods
-# GET
-# POST
-# PUT
-# DELETE
-
-
-Task Manager
-
-Add, edit, or delete tasks.
-Categorize tasks or set due dates.
-"""
-
-
-
-    
