@@ -164,7 +164,7 @@ function PartInput() {
     )
 }
 
-function Edit_task_opt ({task_id}) {
+function Edit_task_opt ({task_id, Name, Text, Deadline, }) {
     // Interface of edit task (imporve this description)
 
     // By the way, end this Pau please!
@@ -175,7 +175,7 @@ function Edit_task_opt ({task_id}) {
                     <h3>EDIT TASK</h3>
                     <div className='Edit_name'>
                         <label for="Edit_name_">Name</label>
-                        <input type="text" id='Edit_name_'/>
+                        <input type="text" id='Edit_name_' value={Name || "Nothing here"}/>
                     </div>
                     <div className='Edit_Text'>
                         <label for >Text</label>
@@ -191,8 +191,8 @@ function Edit_task_opt ({task_id}) {
                         <label for="edit_deadline">Deadline</label>
                         <input id="edit_deadline" type='text'></input>
 
-                        <label for="edit_deadline">Deadline</label>
-                        <input id="edit_deadline" type='text'></input>
+                        <label for="edit_startDay">Start Day</label>
+                        <input id="edit_startDay" type='text'></input>
                     </div>
                 </div>
             </>
@@ -250,19 +250,26 @@ function SingleTask({ Title, Text, DeadLine, Start_Day, ID }) {
             if (!response.ok) {
                 throw new Error("Network response was not ok");
             }
-            console.log("task removed successfully!");
+            console.log(`Task ${ID} removed successfully!`);
         } catch (err) {
             console.error("Error:", err);
         }
     }
 
-    async function Edit_Task_fuinc() {
-        let result = await get_task_from_id({ ID: 'someID' });
-        console.log(result);
-
-
-
-
+    async function Edit_Task_fuinc(ID) {
+        let result = await get_task_from_id({ ID: ID });
+        setConf_widget(null);
+        console.log(result.ID);
+        console.log(result.Name);
+        console.log(result.Text);
+        console.log(result.Deadline);
+        console.log(result.Start_Day);
+        return(
+            <>
+                <Edit_task_opt task_id={result.ID} Name={result.Name} Text={result.Name} Deadline={result.deadline} Start_Day={result.Start_Day}/>
+            </>
+        )
+        
         
     };
 
@@ -363,7 +370,7 @@ export default function Main(){
     return(
         <div className='general_div'>
             <PartInput />
-            <Edit_task_opt />
+            
             <PartOutput />
         </div>
     );

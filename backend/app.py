@@ -189,7 +189,7 @@ async def send_single_task(apiKey = None, task_id = None):
             task_instance = result.scalar_one_or_none()
 
             if not task_instance: # Check if the task doesn't exist
-                return jsonify({"Response": {"Message": f"Task {task_id} not found", "Status": "Error"}})
+                return jsonify({"Response": {"Message": f"Task '{task_id}' not found", "Status": "Error"}})
 
             task = {
                 "ID": task_instance.ID,
