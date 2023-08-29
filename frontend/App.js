@@ -3,7 +3,7 @@ import './styles/styles.css';
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import three_points from './images/list.png';
-
+import cross from './images/cross.png';
 
 
 function Title_input({titleWord, setTitleWord}){
@@ -164,7 +164,7 @@ function PartInput() {
     )
 }
 
-function Edit_task_opt ({task_id, Name, Text, Deadline, }) {
+function Edit_task_opt ({task_id, Name, Text, Deadline, Start_Day, close_edit_task}) {
     // Interface of edit task (imporve this description)
 
     // By the way, end this Pau please!
@@ -172,7 +172,10 @@ function Edit_task_opt ({task_id, Name, Text, Deadline, }) {
         return(
             <>
                 <div className='Edit_task_div'>
-                    <h3>EDIT TASK</h3>
+                    <div className='cross_and_title'>
+                        <h3>EDIT TASK</h3>
+                        <button onClick={() => close_edit_task()}>X</button>
+                    </div>
                     <div className='Edit_name'>
                         <label for="Edit_name_">Name</label>
                         <input type="text" id='Edit_name_' value={Name || "Nothing here"}/>
@@ -189,10 +192,10 @@ function Edit_task_opt ({task_id, Name, Text, Deadline, }) {
                     </div>
                     <div className='Edit_aditional_input'>
                         <label for="edit_deadline">Deadline</label>
-                        <input id="edit_deadline" type='text'></input>
+                        <input id="edit_deadline" type='datetime-local'></input>
 
                         <label for="edit_startDay">Start Day</label>
-                        <input id="edit_startDay" type='text'></input>
+                        <input id="edit_startDay" type='date'></input>
                     </div>
                 </div>
             </>
@@ -236,17 +239,25 @@ function Conf_task({ ID, task_conf_func, conf_widget }) {
     );
 }
 
-function SingleTask({ Title, Text, DeadLine, Start_Day, ID }) {
+function SingleTask({ Title, Text, DeadLine, Start_Day, ID, editValues, setEditValues}) {
     // *add description here*
     const [conf_widget, setConf_widget] = useState(null);
     const [optVisible, setOptVisible] = useState(false);
+    
     let apiKey = "12345";
 
+    
     async function Remove_tak_func(ID) {
-        // Send to backend a request ro remove the task
-
+        // Send to backend a request to remove the task
+    
         try {
-            const response = await fetch(`http://localhost:5000/remove_single_task/${apiKey}/${ID}`);
+            const response = await fetch(`http://localhost:5000/remove_single_task/${apiKey}/${ID}`, {
+                method: 'DELETE', // specify the request method
+                headers: {
+                    'Content-Type': 'application/json',
+                    // 'Authorization': `Bearer ${yourToken}` // if needed
+                },
+            });
             if (!response.ok) {
                 throw new Error("Network response was not ok");
             }
@@ -255,24 +266,29 @@ function SingleTask({ Title, Text, DeadLine, Start_Day, ID }) {
             console.error("Error:", err);
         }
     }
+    
 
     async function Edit_Task_fuinc(ID) {
-        let result = await get_task_from_id({ ID: ID });
-        setConf_widget(null);
-        console.log(result.ID);
-        console.log(result.Name);
-        console.log(result.Text);
-        console.log(result.Deadline);
-        console.log(result.Start_Day);
-        return(
-            <>
-                <Edit_task_opt task_id={result.ID} Name={result.Name} Text={result.Name} Deadline={result.deadline} Start_Day={result.Start_Day}/>
-            </>
-        )
-        
-        
+        try {
+            setConf_widget(null);
+            let result = await get_task_from_id({ ID: ID });
+            if (!result) {
+                console.error("No result from get_task_from_id");
+                return;
+            }
+            console.log("The result -----> ", result);
+            setEditValues(prevValues => ({
+                ...prevValues,
+                ID: result.ID,
+                Name: result.Name,
+                Text: result.Text,
+                Deadline: result.Deadline,
+                Start_Day: result.Start_Day,
+            }));
+        } catch (err) {
+            console.error("Error in Edit_Task_fuinc:", err);
+        }
     };
-
 
 
 
@@ -310,7 +326,7 @@ function SingleTask({ Title, Text, DeadLine, Start_Day, ID }) {
     );
 }
 
-function ListsOfTasks({ tasks }) {
+function ListsOfTasks({tasks, editValues, setEditValues}) {
     if (tasks){
         return (
             <div className='ListOfTasks'>
@@ -322,6 +338,8 @@ function ListsOfTasks({ tasks }) {
                         DeadLine={fields.DeadLine}
                         Start_Day={fields.Start_Day}
                         ID={fields.ID}
+                        editValues={editValues}
+                        setEditValues={setEditValues}
                     />
                 ))}
             </div>
@@ -337,11 +355,18 @@ function ListsOfTasks({ tasks }) {
 
 
 function PartOutput() {
+    const [editValues, setEditValues] = useState({
+        ID: '',
+        Name: '',
+        Text: '',
+        Deadline: '',
+        Start_Day: ''
+    });
     // Output part, witch means geting data from API
     let APIKey = "12345";
     const [taks, setTaks] = useState([]);
 
-    // GET tasks from API
+    // GET tasks from API to post all the time in the interface
     useEffect(() =>{
         fetch(`/get_all_taks/${APIKey}`).then((res) => 
             res.json().then((data) => {
@@ -354,12 +379,23 @@ function PartOutput() {
         })
     })
 
+    function close_edit_task() {
+        setEditValues({
+            ID: '',
+            Name: '',
+            Text: '',
+            Deadline: '',
+            Start_Day: ''
+        });
+    }
+
 
     return(
         <>
+        <Edit_task_opt task_id={editValues.ID} Name={editValues.Name} Text={editValues.Text} Deadline={editValues.Deadline} Start_Day={editValues.Start_Day} close_edit_task={close_edit_task}/>
         <div className='output_div'>
             <h2>TASK VIEW</h2>
-            <ListsOfTasks tasks={taks}/>
+            <ListsOfTasks tasks={taks} editValues={editValues} setEditValues={setEditValues}/>
         </div>
         </>
     );
@@ -370,7 +406,6 @@ export default function Main(){
     return(
         <div className='general_div'>
             <PartInput />
-            
             <PartOutput />
         </div>
     );
@@ -379,69 +414,3 @@ export default function Main(){
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-/*
-function ButonSend() {
-
-    const sendData = () => {
-        const nameValue = document.getElementById("input_name").value;
-        const emailValue = document.getElementById("input_email").value;
-
-        const dataToSend = { name: nameValue, email: emailValue};
-        console.log(dataToSend);
-
-        axios.post('http://localhost:5000/receive', dataToSend)
-            .then(response => {
-                console.log("Response:", response.data);
-            })
-            .catch(error => {
-                console.error("Error sending data:", error);
-            });
-    }
-    
-    function testSend() {
-        useEffect(() => {
-            fetch
-        })
-    }
-
-
-    return(
-        <>
-        <div className='inputs_'>
-            <input type='text' className='input' id="input_name" placeholder='name...'/>
-            <input type='text' className='input' id="input_email" placeholder='email...'/>
-            <button onClick={sendData}>Send Data</button>
-            <button onClick={testSend}>Test_send</button>
-        </div>
-   
-        </>
-    );
-
-}
-
-const [myData, setMyData] = useState({
-    name: null
-})
-
-useEffect(() => {
-    fetch("/test").then((res) =>
-    res.json().then((data) => {
-        setMyData({
-            name: data.Name
-        });
-    }));
-});
-
-*/

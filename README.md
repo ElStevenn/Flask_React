@@ -7,8 +7,9 @@
     visualization.
  
 ## Backend
- - Backend has been created with Flask-API and have all the configuration about manage the databases and
-several outputs and input
+ - Backend has been created with Flask-API and have all the configuration about manage the databases and 
+   all related about modify its data.
 
 
 ## Frontend
+ - Frontend is the visual part...
