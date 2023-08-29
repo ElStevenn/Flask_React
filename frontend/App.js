@@ -166,8 +166,9 @@ function PartInput() {
 
 function Edit_task_opt ({task_id, Name, Text, Deadline, Start_Day, close_edit_task}) {
     // Interface of edit task (imporve this description)
+    const [acutalEditName, setActualEditName] = useState("");
+    const [actualText, setActualText] = useState("");
 
-    // By the way, end this Pau please!
     if (task_id) {
         return(
             <>
@@ -178,7 +179,7 @@ function Edit_task_opt ({task_id, Name, Text, Deadline, Start_Day, close_edit_ta
                     </div>
                     <div className='Edit_name'>
                         <label for="Edit_name_">Name</label>
-                        <input type="text" id='Edit_name_' value={Name || "Nothing here"}/>
+                        <input type="text" id='Edit_name_' value={(acutalEditName ? acutalEditName : Name)} onChange={(e) => setActualEditName(e.target.value)}/>
                     </div>
                     <div className='Edit_Text'>
                         <label for >Text</label>
@@ -188,6 +189,8 @@ function Edit_task_opt ({task_id, Name, Text, Deadline, Start_Day, close_edit_ta
                             autoCorrect='off' 
                             className='text_area'
                             if='edt_text_area'
+                            value={(actualText ? actualText : Text)}
+                            onChange={(e) => setActualText(e.target.value)}
                         ></textarea>
                     </div>
                     <div className='Edit_aditional_input'>
@@ -205,8 +208,7 @@ function Edit_task_opt ({task_id, Name, Text, Deadline, Start_Day, close_edit_ta
     }
 }
 
-async function get_task_from_id({ ID }) {
-    // GET task from its ID
+async function get_task_from_id(ID) {
     let apiKey = "12345";
 
     try {
@@ -218,13 +220,24 @@ async function get_task_from_id({ ID }) {
 
         const data = await response.json();
         console.log("Full response data:", data);
-        return data['Result'];
+
+        if (data.Result) {
+            return data.Result;
+        } else if (data.Response) {
+            console.log("Response:", data.Response);
+            return false;
+        } else if (data.Error) {
+            console.log("Error:", data.Error);
+            return false;
+        }
 
     } catch (err) {
         console.log("Error:", err);
-        return false; // Note: lowercase 'f' in 'false'
+        return false;
     }
 }
+
+
 
 
 function Conf_task({ ID, task_conf_func, conf_widget }) {
@@ -248,18 +261,15 @@ function SingleTask({ Title, Text, DeadLine, Start_Day, ID, editValues, setEditV
 
     
     async function Remove_tak_func(ID) {
-        // Send to backend a request to remove the task
-    
         try {
             const response = await fetch(`http://localhost:5000/remove_single_task/${apiKey}/${ID}`, {
-                method: 'DELETE', // specify the request method
+                method: 'DELETE',
                 headers: {
                     'Content-Type': 'application/json',
-                    // 'Authorization': `Bearer ${yourToken}` // if needed
                 },
             });
             if (!response.ok) {
-                throw new Error("Network response was not ok");
+                throw new Error(`Server responded with a status of ${response.status}`);
             }
             console.log(`Task ${ID} removed successfully!`);
         } catch (err) {
@@ -267,32 +277,28 @@ function SingleTask({ Title, Text, DeadLine, Start_Day, ID, editValues, setEditV
         }
     }
     
+    
 
     async function Edit_Task_fuinc(ID) {
         try {
             setConf_widget(null);
-            let result = await get_task_from_id({ ID: ID });
+            let result = await get_task_from_id(ID);
             if (!result) {
                 console.error("No result from get_task_from_id");
                 return;
             }
-            console.log("The result -----> ", result);
-            setEditValues(prevValues => ({
-                ...prevValues,
+            console.log(result);
+            setEditValues({
                 ID: result.ID,
-                Name: result.Name,
+                Name: result.Title,
                 Text: result.Text,
                 Deadline: result.Deadline,
-                Start_Day: result.Start_Day,
-            }));
+                Start_Day: result.Start_day,
+            });
         } catch (err) {
-            console.error("Error in Edit_Task_fuinc:", err);
+            console.error("Error in Edit_Task_func:", err);
         }
     };
-
-
-
-
 
     
 
@@ -362,7 +368,7 @@ function PartOutput() {
         Deadline: '',
         Start_Day: ''
     });
-    // Output part, witch means geting data from API
+    // Output part, which means getting data from API
     let APIKey = "12345";
     const [taks, setTaks] = useState([]);
 
@@ -377,7 +383,7 @@ function PartOutput() {
         .catch(() => {
             setTaks(null);
         })
-    })
+    }, []);
 
     function close_edit_task() {
         setEditValues({
@@ -389,7 +395,6 @@ function PartOutput() {
         });
     }
 
-
     return(
         <>
         <Edit_task_opt task_id={editValues.ID} Name={editValues.Name} Text={editValues.Text} Deadline={editValues.Deadline} Start_Day={editValues.Start_Day} close_edit_task={close_edit_task}/>
@@ -400,6 +405,7 @@ function PartOutput() {
         </>
     );
 }
+
 
 
 export default function Main(){

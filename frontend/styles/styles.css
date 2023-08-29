@@ -281,8 +281,9 @@ textarea{
 }
 
 .Edit_Text textarea{
-    height: 100px;
+    height: 120px;
     width: 90%;
+    font-size: 21px;
 }
 
 .Edit_aditional_input input{
@@ -293,6 +294,10 @@ textarea{
 .Edit_name input{
     height: 12px;
     width: 98%;
+    border: solid black 1px;
+    background-color: transparent;
+    font-weight: 700;
+    
 }
 
 .cross_and_title {
