@@ -4,7 +4,7 @@ from sqlalchemy import select, create_engine, ForeignKey, types, Integer, Column
 from sqlalchemy.ext.asyncio import create_async_engine,  AsyncSession
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy.orm import declarative_base
-import asyncio, uuid, aiofiles
+import asyncio, uuid, aiofiles, shortuuid, os
 from datetime import datetime, date
 
 """
@@ -39,10 +39,13 @@ class Task_list_table(Base):
     def __repr__(self):
         return f"{self.Title}"
 
-async def write_task_to_file_txt(task):
-    async with aiofiles.open("task.txt", "w") as f:
-        await f.write(f"{task['title']}, {task['text']}, {task['deadline']}, {task['start_day']}")
+async def PrintSomething(cont, name = None):
+    async with aiofiles.open(f"{str(name or shortuuid.uuid())}.txt", mode='w') as f:
+        return await f.write(cont)
 
+async def rewrite_new_date(myDate):
+    """This function manipulate the date to convert a conventional date"""
+    await PrintSomething(myDate)
 
 
 
@@ -142,26 +145,33 @@ async def remove_task(task_id = None, apiKey = None):
 @app.route('/edit_single_task')
 @app.route('/edit_single_task/<string:apiKey>')
 @app.route('/edit_single_task/<string:apiKey>/<string:task_id>', methods=['POST','GET'])
-async def edit_task(apiKey = None, task_id=None):
+async def edit_task(apiKey, task_id):
     """
     Endpoint to edit a single task based on its ID.
     """
     if apiKey not in ['12345','abcde']:
-        return jsonify({"Error": "Invalid URL (POST GET /remove_single_task/<apiKey>/<task_id>)"})
+        return jsonify({"Error": "Invalid API key"}), 401
 
     data = request.json
+
+    # Validate data
+    if not data:
+        return jsonify({"Error": "No data provided"}), 400
+
     async with AsyncSessionLocal() as sess:
         
         # Select task based on ID
-        stmt = sess.execute(select(Task_list_table).filter_by(ID=task_id).limit(1)) # Select table 
-        task_instance = stmt.scalar_one_or_none()  
+        stmt = select(Task_list_table).filter_by(ID=task_id)
+        task_instance = (await sess.execute(stmt)).scalar_one_or_none()
 
-        if task_instance: # In case task not found
-            return jsonify({"Response": f"Task {task_id} not found!", "Status": "Error"})
+        await rewrite_new_date(data) # Remove this line after check if this works...
+
+        if not task_instance:
+            return jsonify({"Response": {"Message": f"Task {task_id} not found!", "Status": "Error"}}), 404
         
         # Update task fields
-        if data.get('NewLine'):
-            task_instance.Line = data['NewLine']
+        if data.get('NewName'):
+            task_instance.Line = data['NewName']
         if data.get('NewText'):
             task_instance.Text = data['NewText']
         if data.get('NewDeadline'):
@@ -169,19 +179,24 @@ async def edit_task(apiKey = None, task_id=None):
         if data.get('NewStartDay'):
             task_instance.StartDay = data['NewStartDay']
 
-        # Commit chages
+        # Commit changes
         await sess.commit()
 
+    return jsonify({"Message": "Task updated successfully"}), 200
 
-    return jsonify({"Message":"This module is actually making! (Change this shit pau please)"})   
 
+
+@app.route('/return_single_task/')
 @app.route('/return_single_task/<string:apiKey>')
 @app.route('/return_single_task/<string:apiKey>/<string:task_id>')
 async def send_single_task(apiKey = None, task_id = None):
     """Return a single task from its ID"""
-    if apiKey not in ['12345','abcde']:
+    if apiKey not in ['12345','abcde', None]:
         return jsonify({"Error":"Invalid apiKey"})
+    elif apiKey is None:
+        return jsonify({"Error": "Input error (GET /return_single_task/<string:apiKey>/<string:task_id>)"})
     
+
     try:
         async with AsyncSessionLocal() as sess:
             # Execute query
@@ -189,14 +204,14 @@ async def send_single_task(apiKey = None, task_id = None):
             task_instance = result.scalar_one_or_none()
 
             if not task_instance: # Check if the task doesn't exist
-                return jsonify({"Response": {"Message": f"Task '{task_id}' not found", "Status": "Error"}})
+                return jsonify({"Response": {"Message": f"Task '{task_id or 'Null'}' not found", "Status": "Error"}})
 
             task = {
                 "ID": task_instance.ID,
                 "Title": task_instance.Title,
                 "Text": task_instance.Text,
-                "Deadline": task_instance.DeadLine if task_instance.DeadLine else None,
-                "Start_day": task_instance.Start_Day if task_instance.Start_Day else None 
+                "Deadline": str(task_instance.DeadLine) if task_instance.DeadLine else None,
+                "Start_day": str(task_instance.Start_Day) if task_instance.Start_Day else None 
             }  
 
             return jsonify({"Result": task})

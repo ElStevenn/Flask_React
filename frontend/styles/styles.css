@@ -291,6 +291,24 @@ textarea{
     width: 20%;
 }
 
+.Edit_aditional_input {
+    display: flex;
+    flex-direction: column;
+}
+
+.Edit_aditional_input button{
+    height: 25px;
+    width: 100px;
+    border: solid 0px;
+    border-radius: 0px;
+    cursor: pointer;
+    background-color: #1570cd;
+    font-weight: 700;
+    color: wheat;
+    margin-top: 5px;
+}
+
+
 .Edit_name input{
     height: 12px;
     width: 98%;
@@ -318,3 +336,4 @@ textarea{
     position: absolute;
     right: 0;
 }
+

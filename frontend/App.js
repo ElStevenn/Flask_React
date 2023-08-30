@@ -146,7 +146,6 @@ function PartInput() {
                 console.log("Response:", response.data);
             })
             .catch(error => {
-                // in case the API doesn't work
                 alert("An error has occured!");
             });
         }   
@@ -164,10 +163,13 @@ function PartInput() {
     )
 }
 
-function Edit_task_opt ({task_id, Name, Text, Deadline, Start_Day, close_edit_task}) {
+function Edit_task_opt ({task_id, Name, Text, Deadline, Start_Day, close_edit_task, editEditedTask}) {
     // Interface of edit task (imporve this description)
     const [acutalEditName, setActualEditName] = useState("");
     const [actualText, setActualText] = useState("");
+    const [actualDL, setActualDL] = useState(null);
+    const [actualST, setactualST] = useState(null);
+
 
     if (task_id) {
         return(
@@ -179,7 +181,7 @@ function Edit_task_opt ({task_id, Name, Text, Deadline, Start_Day, close_edit_ta
                     </div>
                     <div className='Edit_name'>
                         <label for="Edit_name_">Name</label>
-                        <input type="text" id='Edit_name_' value={(acutalEditName ? acutalEditName : Name)} onChange={(e) => setActualEditName(e.target.value)}/>
+                        <input type="text" id='Edit_name_' value={(acutalEditName ? acutalEditName : Name)} onChange={(e) => setActualEditName(e.target.value)} id="_edit_name_"/>
                     </div>
                     <div className='Edit_Text'>
                         <label for >Text</label>
@@ -188,17 +190,25 @@ function Edit_task_opt ({task_id, Name, Text, Deadline, Start_Day, close_edit_ta
                             autoComplete="off"  
                             autoCorrect='off' 
                             className='text_area'
-                            if='edt_text_area'
+                            id='edit_text_area'
                             value={(actualText ? actualText : Text)}
                             onChange={(e) => setActualText(e.target.value)}
                         ></textarea>
                     </div>
                     <div className='Edit_aditional_input'>
                         <label for="edit_deadline">Deadline</label>
-                        <input id="edit_deadline" type='datetime-local'></input>
+                        <input id="edit_deadline" type='datetime-local' value={(actualDL ? actualDL : Deadline)} onChange={(e) => setActualDL(e.target.value)}></input>
 
                         <label for="edit_startDay">Start Day</label>
-                        <input id="edit_startDay" type='date'></input>
+                        <input id="edit_startDay" type='date' value={(actualST ? actualST : Start_Day)} onChange={(e) => setactualST(e.target.value)}></input>
+
+                        <button onClick={() => editEditedTask(
+                            task_id, 
+                            document.getElementById('_edit_name_').value, 
+                            document.getElementById('edit_text_area').value,
+                            document.getElementById('edit_deadline').value,
+                            document.getElementById('edit_startDay').value
+                        )}>Edit task</button>
                     </div>
                 </div>
             </>
@@ -219,7 +229,6 @@ async function get_task_from_id(ID) {
         }
 
         const data = await response.json();
-        console.log("Full response data:", data);
 
         if (data.Result) {
             return data.Result;
@@ -236,8 +245,6 @@ async function get_task_from_id(ID) {
         return false;
     }
 }
-
-
 
 
 function Conf_task({ ID, task_conf_func, conf_widget }) {
@@ -360,6 +367,30 @@ function ListsOfTasks({tasks, editValues, setEditValues}) {
 }
 
 
+async function set_edit_task(ID, name, text, DL, SD) {
+    // Function to edit the task sending a post connection with API
+    let api_key = "12345";
+    const updatedTask = {
+        NewLine: name,
+        NewText: text,
+        NewDeadline: DL,
+        NewStartDay: SD
+    }
+
+    console.log(updatedTask);
+
+    // Send the data to the API
+    await axios.post(`http://localhost:5000/edit_single_task/${api_key}/${ID}`, updatedTask)
+
+    .then(res => {
+        console.log("Response: ", res)
+    })
+    .catch(err => {
+        console.error("Error ocurred: ", err)
+    })
+}
+
+
 function PartOutput() {
     const [editValues, setEditValues] = useState({
         ID: '',
@@ -395,9 +426,30 @@ function PartOutput() {
         });
     }
 
+        async function editEditedTask(ID, name, text, DL, SD) {
+            // Edit Task and at the same time calling set_edit_task() function
+            if (!name){
+                alert("You haven't provided the name!");
+            }else if (!text) {
+                alert("You haven't provided the text!");
+            } else if(!DL) {
+                alert("You haven't provided the Dead Line!");
+            }else {
+                setEditValues({
+                    ID: '',
+                    Name: '',
+                    Text: '',
+                    Deadline: '',
+                    Start_Day: ''
+                });
+
+                await set_edit_task(ID, name, text, DL, SD); // Function to edit the task
+            }           
+    }
+
     return(
         <>
-        <Edit_task_opt task_id={editValues.ID} Name={editValues.Name} Text={editValues.Text} Deadline={editValues.Deadline} Start_Day={editValues.Start_Day} close_edit_task={close_edit_task}/>
+        <Edit_task_opt task_id={editValues.ID} Name={editValues.Name} Text={editValues.Text} Deadline={editValues.Deadline} Start_Day={editValues.Start_Day} close_edit_task={close_edit_task} editEditedTask={editEditedTask}/>
         <div className='output_div'>
             <h2>TASK VIEW</h2>
             <ListsOfTasks tasks={taks} editValues={editValues} setEditValues={setEditValues}/>
