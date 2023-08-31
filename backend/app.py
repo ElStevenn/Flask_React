@@ -39,8 +39,8 @@ class Task_list_table(Base):
     def __repr__(self):
         return f"{self.Title}"
 
-async def PrintSomething(cont, name = None):
-    async with aiofiles.open(f"{str(name or shortuuid.uuid())}.txt", mode='w') as f:
+async def PrintSomething(cont, name = None, fileType = "txt"):
+    async with aiofiles.open(f"{str(name or shortuuid.uuid())}.{fileType}", mode='w') as f:
         await f.write(cont)
 
 async def rewrite_new_date(myDate):
@@ -149,12 +149,22 @@ async def edit_task(apiKey, task_id):
     """
     Endpoint to edit a single task based on its ID.
     """
+
     if apiKey not in ['12345', 'abcde']:
         return jsonify({"Error": "Invalid API key"}), 401
 
     data = request.json
 
-    # Validate data
+    myData = {
+        "Name":data['NewName'],
+        "Text": data['NewText'],
+        "DL": data['NewDeadline'],
+        "ST": data['NewStartDay'] if data['NewStartDay'] else None
+    }
+
+    await PrintSomething(str(data), name=os.getcwd() + "/logs/myLog.json")
+
+
     if not data:
         return jsonify({"Error": "No data provided"}), 400
 
@@ -167,6 +177,7 @@ async def edit_task(apiKey, task_id):
 
 
             if not task_instance:
+                await PrintSomething(task_instance, os.getcwd() + f"/logs/myLog.json")
                 return jsonify({"Response": {"Message": f"Task {task_id} not found!", "Status": "Error"}}), 404
             
             # Update task fields
@@ -175,19 +186,22 @@ async def edit_task(apiKey, task_id):
             if data.get('NewText'):
                 task_instance.Text = data['NewText']
             if data.get('NewDeadline'):
-                task_instance.DeadLine = data['NewDeadline']
+                date_part, time_part = data.get('NewDeadline').split('T')
+                year, month, day = map(int, date_part.split('-'))
+                hour, minute = map(int, time_part.split(':'))
+                task_instance.DeadLine = datetime(year, month, day, hour, minute)
+
             if data.get('NewStartDay'):
-                task_instance.Start_Day = data['NewStartDay']
+                year,month,day = data['NewStartDay'].split('-')
+                task_instance.Start_Day = date(year,month,day)
 
             # Commit changes
             await sess.commit()
-
             return jsonify({"Message": "Task updated successfully"}), 200
 
         except Exception as e:
             return jsonify({"Error": str(e)})
-
-
+        
 
 @app.route('/return_single_task/')
 @app.route('/return_single_task/<string:apiKey>')
@@ -246,7 +260,7 @@ def page_not_found(e):
         "message": "Invalid URL (GET /remove_single_task | /get_all_taks | /reurn_single_task | /edit_single_task | POST /get_task_and_ddbb )",
         "type": "invalid_request_error",
         "param": None,
-        "code": None
+        "code": e
     }
 }
     return jsonify(error_mesage)
