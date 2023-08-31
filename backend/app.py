@@ -41,11 +41,11 @@ class Task_list_table(Base):
 
 async def PrintSomething(cont, name = None):
     async with aiofiles.open(f"{str(name or shortuuid.uuid())}.txt", mode='w') as f:
-        return await f.write(cont)
+        await f.write(cont)
 
 async def rewrite_new_date(myDate):
     """This function manipulate the date to convert a conventional date"""
-    await PrintSomething(myDate)
+    await PrintSomething(myDate, name="MyFile.txt")
 
 
 
@@ -144,12 +144,12 @@ async def remove_task(task_id = None, apiKey = None):
 
 @app.route('/edit_single_task')
 @app.route('/edit_single_task/<string:apiKey>')
-@app.route('/edit_single_task/<string:apiKey>/<string:task_id>', methods=['POST','GET'])
+@app.route('/edit_single_task/<string:apiKey>/<string:task_id>', methods=['POST'])
 async def edit_task(apiKey, task_id):
     """
     Endpoint to edit a single task based on its ID.
     """
-    if apiKey not in ['12345','abcde']:
+    if apiKey not in ['12345', 'abcde']:
         return jsonify({"Error": "Invalid API key"}), 401
 
     data = request.json
@@ -159,30 +159,33 @@ async def edit_task(apiKey, task_id):
         return jsonify({"Error": "No data provided"}), 400
 
     async with AsyncSessionLocal() as sess:
-        
-        # Select task based on ID
-        stmt = select(Task_list_table).filter_by(ID=task_id)
-        task_instance = (await sess.execute(stmt)).scalar_one_or_none()
+        try:
+           # Select task based on ID
+            stmt = select(Task_list_table).filter_by(ID=task_id)
+            result = await sess.execute(stmt)
+            task_instance = result.scalar_one_or_none()
 
-        await rewrite_new_date(data) # Remove this line after check if this works...
 
-        if not task_instance:
-            return jsonify({"Response": {"Message": f"Task {task_id} not found!", "Status": "Error"}}), 404
-        
-        # Update task fields
-        if data.get('NewName'):
-            task_instance.Line = data['NewName']
-        if data.get('NewText'):
-            task_instance.Text = data['NewText']
-        if data.get('NewDeadline'):
-            task_instance.Deadline = data['NewDeadline']
-        if data.get('NewStartDay'):
-            task_instance.StartDay = data['NewStartDay']
+            if not task_instance:
+                return jsonify({"Response": {"Message": f"Task {task_id} not found!", "Status": "Error"}}), 404
+            
+            # Update task fields
+            if data.get('NewName'):
+                task_instance.Title = data['NewName']
+            if data.get('NewText'):
+                task_instance.Text = data['NewText']
+            if data.get('NewDeadline'):
+                task_instance.DeadLine = data['NewDeadline']
+            if data.get('NewStartDay'):
+                task_instance.Start_Day = data['NewStartDay']
 
-        # Commit changes
-        await sess.commit()
+            # Commit changes
+            await sess.commit()
 
-    return jsonify({"Message": "Task updated successfully"}), 200
+            return jsonify({"Message": "Task updated successfully"}), 200
+
+        except Exception as e:
+            return jsonify({"Error": str(e)})
 
 
 
