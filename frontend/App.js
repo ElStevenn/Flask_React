@@ -339,7 +339,7 @@ function SingleTask({ Title, Text, DeadLine, Start_Day, ID, editValues, setEditV
     );
 }
 
-function ListsOfTasks({tasks, editValues, setEditValues}) {
+function ListsOfTasks({tasks, editValues, setEditValues, orderBy}) {
     if (tasks){
         return (
             <div className='ListOfTasks'>
@@ -368,10 +368,9 @@ function ListsOfTasks({tasks, editValues, setEditValues}) {
 
 
 async function set_edit_task(ID, name, text, DL, SD) {
-    // Function to edit the task sending a post connection with API
     let api_key = "12345";
     const updatedTask = {
-        NewLine: name,
+        NewName: name,
         NewText: text,
         NewDeadline: DL,
         NewStartDay: SD
@@ -379,19 +378,21 @@ async function set_edit_task(ID, name, text, DL, SD) {
 
     console.log(updatedTask);
 
-    // Send the data to the API
-    await axios.post(`http://localhost:5000/edit_single_task/${api_key}/${ID}`, updatedTask)
+    const url = `http://localhost:5000/edit_single_task/${api_key}/${ID}`;
+    console.log("This is the link ->", url)
 
-    .then(res => {
-        console.log("Response: ", res)
-    })
-    .catch(err => {
-        console.error("Error ocurred: ", err)
-    })
+    try {
+        const res = await axios.post(url, updatedTask);
+        console.log("Response: ", res.data);
+    } catch (err) {
+        console.error("Error occurred: ", err);
+    }
 }
 
 
+
 function PartOutput() {
+    const [orderBy, setOrderBy] = useState("pred");
     const [editValues, setEditValues] = useState({
         ID: '',
         Name: '',
@@ -405,7 +406,7 @@ function PartOutput() {
 
     // GET tasks from API to post all the time in the interface
     useEffect(() =>{
-        fetch(`/get_all_taks/${APIKey}`).then((res) => 
+        fetch(`/get_all_taks/${APIKey}/${orderBy}`).then((res) => 
             res.json().then((data) => {
                 setTaks(
                     data.Response
@@ -451,7 +452,19 @@ function PartOutput() {
         <>
         <Edit_task_opt task_id={editValues.ID} Name={editValues.Name} Text={editValues.Text} Deadline={editValues.Deadline} Start_Day={editValues.Start_Day} close_edit_task={close_edit_task} editEditedTask={editEditedTask}/>
         <div className='output_div'>
-            <h2>TASK VIEW</h2>
+            <div className='middle_side'>
+                <h2>TASK VIEW</h2>
+                <div className='div_edit'>
+                    <h3>Order by:</h3>
+                    <div>
+                        <button onClick={() => setOrderBy("dl_desc")}>Deadline desc</button>
+                        <button onClick={() => setOrderBy("dl_asc")}>Deadline asc</button>
+                        <button onClick={() => setOrderBy("pred_flip")}>predetermined asc</button>
+                        <button onClick={() => setOrderBy("pred")}>predetermined</button>
+                    </div>
+                </div>
+            </div>
+            
             <ListsOfTasks tasks={taks} editValues={editValues} setEditValues={setEditValues}/>
         </div>
         </>

@@ -337,3 +337,21 @@ textarea{
     right: 0;
 }
 
+/*Div edit by*/
+
+.middle_side{
+    display: flex;
+    flex-direction: column;
+}
+
+.middle_side h2{
+    text-align: center;
+}
+
+.div_edit{
+    position: relative;
+    
+    
+}
+
+

@@ -1,6 +1,6 @@
 from flask import Flask, jsonify, request
 from flask_cors import CORS
-from sqlalchemy import select, create_engine, ForeignKey, types, Integer, Column, String, MetaData, Date, DateTime
+from sqlalchemy import select, create_engine, ForeignKey, types, Integer, Column, String, MetaData, Date, DateTime, desc, asc
 from sqlalchemy.ext.asyncio import create_async_engine,  AsyncSession
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy.orm import declarative_base
@@ -90,13 +90,23 @@ async def insert_database():
 
 @app.route('/get_all_taks')
 @app.route('/get_all_taks/<string:apiKey>')
-async def get_data(apiKey = None):
-    """Get all posts from the database and send to frontend"""
+@app.route('/get_all_taks/<string:apiKey>/<string:orderBy>')
+async def get_data(apiKey = None, orderBy = "pred"):
+    """Get all posts from the database and send to frontend | parametters (apKey and orderBy where we can decide the order of the tasks)"""
     if apiKey == "12345" or apiKey == "abcde":
         async with AsyncSessionLocal() as session:
             try:
                 # Use select from SQLAlchemy to feth all tasks
-                stmt = select(Task_list_table)
+                if orderBy == 'dl_desc':
+                    stmt = select(Task_list_table).order_by(desc(Task_list_table.DeadLine))
+                elif orderBy == 'dl_asc':
+                    stmt = select(Task_list_table).order_by(asc(Task_list_table.DeadLine))
+                elif orderBy == 'pred_flip':
+                    stmt = select(Task_list_table).order_by(desc(Task_list_table.ID))
+                elif orderBy == 'pred':
+                    stmt = select(Task_list_table)
+                else:
+                    return jsonify({"Error":{"Type":"Value Error","Message":"You haven't inserted a correct order by (OPTIONS dl_desc | dl_asc | pred_flip | pred)"}})
                 result = await session.execute(stmt)
                 tasks = result.scalars().all()
 
@@ -203,7 +213,7 @@ async def edit_task(apiKey, task_id):
             return jsonify({"Error": str(e)})
         
 
-@app.route('/return_single_task/')
+@app.route('/return_single_task')
 @app.route('/return_single_task/<string:apiKey>')
 @app.route('/return_single_task/<string:apiKey>/<string:task_id>')
 async def send_single_task(apiKey = None, task_id = None):
