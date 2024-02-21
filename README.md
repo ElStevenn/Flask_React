@@ -17,4 +17,6 @@
    Name input, Text input (max 400 characters), Deadline input and Start Day input (optional) and a button to 
    "pubish a new task".
 
+## Conclution
+This it was one of my firsts personal projects to learn about React
 
