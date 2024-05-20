@@ -18,5 +18,5 @@
    "pubish a new task".
 
 ## Conclution
-This it was one of my firsts personal projects to learn about React :)
+This it was one of my firsts personal projects to learn about React
 
